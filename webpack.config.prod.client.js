@@ -20,6 +20,10 @@ const UglifyJsPluginConfig = new webpack.optimize.UglifyJsPlugin({
   comments: false,
 });
 
+const DefinePluginConfig = new webpack.DefinePlugin({
+  'process.env.NODE_ENV': JSON.stringify('production'),
+});
+
 const CleanWebpackPluginConfig = new CleanWebpackPlugin(['./client/build']);
 
 module.exports = {
@@ -50,6 +54,7 @@ module.exports = {
   },
   plugins: [
     HtmlWebpackPluginConfig,
+    DefinePluginConfig,
     UglifyJsPluginConfig,
     CleanWebpackPluginConfig,
   ],

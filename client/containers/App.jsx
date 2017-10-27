@@ -1,48 +1,84 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Button } from 'react-bootstrap';
+import { FormGroup, FormControl, ControlLabel, Button } from 'react-bootstrap';
 
-import awesomeAction from '../actions/awesome';
-import changeName from '../actions/change-name';
+import changeMsg from '../actions/change-msg';
 
-const App = ({ awesome, makeItAwesome, name, change }) => (
-  <div>
-    {name || 'John'} {awesome ? 'is awesome!!' : 'sucks hard'}.
-    <br />
-    <Button
-      bsStyle="primary"
-      onClick={makeItAwesome}
-    >
-      Make it awesome
-    </Button>
-    <Button
-      bsStyle="danger"
-      onClick={() => change('Michael')}
-    >
-      Change the name!
-    </Button>
-  </div>
-);
+class App extends React.Component {
+  /**
+   * @param {object} props fhowfjweojfw
+   */
+  constructor(props) {
+    super(props);
+    this.state = {
+      current: '',
+    };
+  }
+
+  /**
+   * @returns {undefined}
+   */
+  componentDidMount() {
+    this.msgListener = this.props.io.on('CHANGE_MSG', (msg) => {
+      this.props.change(msg);
+    });
+  }
+
+  handleChange = (e) => {
+    this.setState({ current: e.target.value });
+  }
+
+  handleClick = () => {
+    this.props.io.emit('CHANGE_MSG', this.state.current);
+  }
+
+  /**
+   * @returns {object} React Element
+   */
+  render() {
+    return (
+      <div>
+        <FormGroup style={{ marginTop: '50px', marginLeft: '100px' }}>
+          <ControlLabel>Current is: {this.props.msg}</ControlLabel>
+          <FormControl
+            type="text"
+            value={this.state.current}
+            placeholder="Your message"
+            onChange={this.handleChange}
+            style={{ width: '500px', marginTop: '20px', marginBottom: '20px' }}
+          />
+          <Button
+            bsStyle="primary"
+            onClick={this.handleClick}
+          >
+            Send this stuff
+          </Button>
+        </FormGroup>
+      </div>
+    );
+  }
+}
 
 App.propTypes = {
   change: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  awesome: PropTypes.bool.isRequired,
-  makeItAwesome: PropTypes.func.isRequired,
+  msg: PropTypes.string.isRequired,
+  io: PropTypes.shape({
+    id: PropTypes.string,
+    on: PropTypes.func,
+    emit: PropTypes.func,
+  }).isRequired,
 };
 
 const mapStateToProps = state => ({
-  name: state.nameStuff.name,
+  msg: state.messages.msg,
   awesome: state.awesomeness.awesome,
+  io: state.socket.io,
 });
 
 const mapDispatchToProps = dispatch => ({
-  makeItAwesome: () => {
-    dispatch(awesomeAction());
-  },
-  change: (name) => {
-    dispatch(changeName(name));
+  change: (msg) => {
+    dispatch(changeMsg(msg));
   },
 });
 

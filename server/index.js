@@ -17,6 +17,9 @@ app.get('/*', (req, res) => {
 const server = app.listen(process.env.PORT || 3001);
 const io = socketIo(server);
 
-io.on('connection', () => {
-  console.log('User connected');
+io.on('connection', (socket) => {
+  socket.on('CHANGE_MSG', (msg) => {
+    console.log(msg);
+    io.emit('CHANGE_MSG', msg);
+  });
 });

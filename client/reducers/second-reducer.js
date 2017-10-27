@@ -1,12 +1,12 @@
 const initialState = {
-  name: '',
+  msg: '',
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case 'CHANGE_NAME':
+    case 'CHANGE_MSG':
       return {
-        name: action.payload,
+        msg: action.payload,
       };
 
     default:

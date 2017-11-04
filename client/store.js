@@ -1,13 +1,24 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
 import logger from 'redux-logger';
 
-import awesomeness from './reducers/reducer';
-import messages from './reducers/second-reducer';
-import socket from './reducers/io-reducer';
+import reducer from './reducers/reducer';
+import rootSaga from './saga/rootSaga';
+
+const sagaMiddleware = createSagaMiddleware();
+
+const initialState = {
+  data: null,
+  error: null,
+};
 
 
-export default createStore(
-  combineReducers({ awesomeness, messages, socket }),
-  {},
-  applyMiddleware(logger),
+const store = createStore(
+  reducer,
+  initialState,
+  applyMiddleware(sagaMiddleware, logger),
 );
+
+sagaMiddleware.run(rootSaga);
+
+export default store;

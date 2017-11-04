@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { FormGroup, FormControl, ControlLabel, Button } from 'react-bootstrap';
+import { FormGroup, FormControl, ControlLabel, Button, InputGroup } from 'react-bootstrap';
 
-import changeMsg from '../actions/change-msg';
+import { makeRequest } from '../actions/get-company-data';
+
 
 class App extends React.Component {
   /**
@@ -12,25 +13,16 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      current: '',
+      text: '',
     };
   }
 
-  /**
-   * @returns {undefined}
-   */
-  componentDidMount() {
-    this.msgListener = this.props.io.on('CHANGE_MSG', (msg) => {
-      this.props.change(msg);
-    });
-  }
-
   handleChange = (e) => {
-    this.setState({ current: e.target.value });
+    this.setState({ text: e.target.value });
   }
 
   handleClick = () => {
-    this.props.io.emit('CHANGE_MSG', this.state.current);
+    this.props.makeRequest(this.state.text);
   }
 
   /**
@@ -39,46 +31,41 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <FormGroup style={{ marginTop: '50px', marginLeft: '100px' }}>
-          <ControlLabel>Current is: {this.props.msg}</ControlLabel>
-          <FormControl
-            type="text"
-            value={this.state.current}
-            placeholder="Your message"
-            onChange={this.handleChange}
-            style={{ width: '500px', marginTop: '20px', marginBottom: '20px' }}
-          />
-          <Button
-            bsStyle="primary"
-            onClick={this.handleClick}
-          >
-            Send this stuff
-          </Button>
+        <FormGroup>
+          <ControlLabel>Add stock:</ControlLabel>
+          <InputGroup>
+            <FormControl
+              type="text"
+              value={this.state.text}
+              placeholder="Stock's symbol"
+              onChange={this.handleChange}
+            />
+            <InputGroup.Button>
+              <Button bsStyle="success" onClick={this.handleClick}>
+                Add
+              </Button>
+            </InputGroup.Button>
+          </InputGroup>
         </FormGroup>
+        {this.props.data ? this.props.data.companyName : null}
       </div>
     );
   }
 }
 
 App.propTypes = {
-  change: PropTypes.func.isRequired,
-  msg: PropTypes.string.isRequired,
-  io: PropTypes.shape({
-    id: PropTypes.string,
-    on: PropTypes.func,
-    emit: PropTypes.func,
-  }).isRequired,
+  makeRequest: PropTypes.func.isRequired,
+  data: PropTypes.shape({
+    companyName: PropTypes.string,
+  }),
 };
 
 const mapStateToProps = state => ({
-  msg: state.messages.msg,
-  awesome: state.awesomeness.awesome,
-  io: state.socket.io,
+  data: state.data,
 });
-
 const mapDispatchToProps = dispatch => ({
-  change: (msg) => {
-    dispatch(changeMsg(msg));
+  makeRequest: (symbol) => {
+    dispatch(makeRequest(symbol));
   },
 });
 
